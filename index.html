@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Trash Report | PAKALOLO</title>
+  <style>
+    :root {
+      --green: #2f684f;
+      --green2: #dce9d9;
+      --cream: #fbf8f1;
+      --ink: #25382d;
+      --muted: #78867b;
+      --line: #e4e7dd;
+      --pink: #f5e5e8;
+      --orange: #b97736;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f1f0e9;
+      color: var(--ink);
+      font: 15px/1.5 Arial, "Noto Sans Thai", sans-serif;
+    }
+
+    .app {
+      max-width: 430px;
+      min-height: 100vh;
+      margin: auto;
+      background: var(--cream);
+      position: relative;
+      padding-bottom: 82px;
+      box-shadow: 0 0 25px #263b2910;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 22px 20px 18px;
+      background: #e4eee0;
+      border-radius: 0 0 24px 24px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: bold;
+      letter-spacing: .04em;
+    }
+
+    .logo { display: flex; gap: 8px; align-items: center; }
+
+    .leaf {
+      background: white;
+      width: 31px;
+      height: 31px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 17px;
+    }
+
+    /* ── Typography ── */
+    h1 { font-size: 27px; line-height: 1.2; margin: 17px 0 7px; letter-spacing: -.5px; }
+    h2 { font-size: 18px; margin: 22px 0 11px; }
+    h3 { font-size: 15px; margin: 0 0 4px; }
+    p  { margin: 5px 0; }
+
+    .sub  { font-size: 13px; color: var(--muted); }
+    .date { font-size: 12px; color: var(--muted); }
+
+    /* ── Layout ── */
+    main { padding: 0 17px; }
+
+    .page        { display: none; }
+    .page.active { display: block; }
+
+    .greeting { padding-top: 18px; }
+
+    /* ── Stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .stat, .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat small  { display: block; color: var(--muted); font-size: 12px; }
+    .stat strong { font-size: 27px; font-weight: 700; }
+    .stat .dot   { font-size: 12px; color: var(--green); }
+
+    /* ── Action buttons ── */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .action {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 14px 12px;
+      text-align: left;
+      color: var(--ink);
+      min-height: 104px;
+      cursor: pointer;
+    }
+
+    .action .ico  { font-size: 24px; display: block; margin-bottom: 7px; }
+    .action b     { display: block; font-size: 14px; }
+    .action small { color: var(--muted); font-size: 11px; }
+
+    /* ── Buttons ── */
+    button { font: inherit; cursor: pointer; }
+
+    .primary {
+      border: 0;
+      background: var(--green);
+      color: white;
+      padding: 12px 14px;
+      border-radius: 11px;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .secondary {
+      border: 1px solid #d4dfd0;
+      background: #edf3e9;
+      color: var(--green);
+      padding: 11px 13px;
+      border-radius: 11px;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 9px;
+    }
+
+    .back {
+      border: 0;
+      background: transparent;
+      color: var(--green);
+      padding: 15px 0 3px;
+      font-weight: bold;
+    }
+
+    /* ── Issue card ── */
+    .issue { display: flex; gap: 12px; align-items: center; }
+
+    .issueicon {
+      width: 47px;
+      height: 47px;
+      border-radius: 13px;
+      background: #f7e8e7;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .issuebody { flex: 1; }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #f8edda;
+      color: #94652b;
+      margin-top: 6px;
+    }
+
+    .tag.green { background: #e5f0e2; color: var(--green); }
+
+    /* ── Map ── */
+    .map {
+      height: 240px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 17px;
+      background-color: #e9eee1;
+      background-image:
+        linear-gradient(30deg, transparent 46%, #fff 47%, #fff 51%, transparent 52%),
+        linear-gradient(120deg, transparent 40%, #fff 41%, #fff 45%, transparent 46%),
+        linear-gradient(90deg, transparent 62%, #fff 63%, #fff 67%, transparent 68%);
+    }
+
+    .park {
+      position: absolute;
+      left: 7%; top: 10%;
+      width: 37%; height: 31%;
+      background: #cddfc3;
+      border-radius: 40%;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      color: #4f7152;
+    }
+
+    .pin {
+      position: absolute;
+      width: 27px; height: 27px;
+      border: 3px solid white;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: #3b805d;
+      box-shadow: 0 2px 6px #0002;
+    }
+
+    .pin::after {
+      content: "";
+      display: block;
+      background: white;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin: 7px;
+    }
+
+    .pin.warn { background: #d69a48; }
+    .pin.full { background: #c76b70; }
+
+    .mapkey {
+      position: absolute;
+      bottom: 9px; left: 9px; right: 9px;
+      background: #ffffffed;
+      border-radius: 10px;
+      padding: 7px;
+      display: flex;
+      justify-content: space-around;
+      font-size: 10px;
+    }
+
+    /* ── Form ── */
+    label { display: block; font-size: 13px; font-weight: bold; margin: 14px 0 6px; }
+
+    input, select, textarea {
+      width: 100%;
+      font: inherit;
+      padding: 11px;
+      border: 1px solid #d8ded4;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    textarea { min-height: 78px; resize: vertical; }
+
+    /* ── Notices ── */
+    .notice {
+      background: #f6efe0;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 12px;
+      color: #7d633a;
+      margin: 13px 0;
+    }
+
+    .success {
+      background: #e7f1e4;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      color: #2f684f;
+      margin-top: 12px;
+    }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; gap: 10px; margin: 15px 0; }
+
+    .stepdot {
+      width: 23px; height: 23px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e1ecdc;
+      color: var(--green);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .steptext        { font-size: 13px; }
+    .steptext small  { display: block; color: var(--muted); font-size: 11px; }
+
+    /* ── Points ── */
+    .points {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f5e9ec;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .points strong { font-size: 23px; }
+
+    /* ── Bottom nav ── */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(430px, 100%);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px 7px calc(8px + env(safe-area-inset-bottom));
+      background: #fff;
+      border-top: 1px solid var(--line);
+      z-index: 5;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: #7d897f;
+      font-size: 10px;
+      padding: 5px 1px;
+    }
+
+    .nav button span   { display: block; font-size: 19px; margin-bottom: 1px; }
+    .nav button.active { color: var(--green); font-weight: bold; }
+
+    /* ── Footer ── */
+    footer { text-align: center; color: #a1a99e; font-size: 10px; padding: 18px 0; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <header>
+    <div class="topline">
+      <div class="logo">
+        <span class="leaf">🌱</span>
+        <span>PAKALOLO GROUP</span>
+      </div>
+      <span>DEMO</span>
+    </div>
+    <h1>Smart Trash<br>Report</h1>
+    <p class="sub">ช่วยกันดูแลพื้นที่สาธารณะให้สะอาดขึ้น</p>
+  </header>
+
+  <main>
+
+    <!-- ── หน้าหลัก ── -->
+    <section class="page active" id="home">
+      <div class="greeting">
+        <div class="date">วันพุธที่ 14 ตุลาคม 2569 · พื้นที่ตัวอย่าง</div>
+        <h2 style="margin-top: 7px">ภาพรวมวันนี้</h2>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <small>จุดทิ้งขยะทั้งหมด</small>
+          <strong>12</strong>
+          <span class="dot">● จุดในพื้นที่จำลอง</span>
+        </div>
+        <div class="stat">
+          <small>จุดที่ควรตรวจสอบ</small>
+          <strong>3</strong>
+          <span style="font-size: 12px; color: var(--orange)">● รอเก็บขยะ</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="action" onclick="go('report')">
+          <span class="ico">📷</span>
+          <b>แจ้งปัญหาขยะ</b>
+          <small>ส่งรูปและระบุสถานที่</small>
+        </button>
+        <button class="action" onclick="go('map')">
+          <span class="ico">🗺️</span>
+          <b>ดูแผนที่ถังขยะ</b>
+          <small>เช็กสถานะของแต่ละจุด</small>
+        </button>
+      </div>
+
+      <h2>จุดที่ควรตรวจสอบ</h2>
+
+      <div class="card issue">
+        <div class="issueicon">🗑️</div>
+        <div class="issuebody">
+          <h3>ถังขยะสวนกลาง</h3>
+          <p class="sub">ใกล้สนามหญ้า · 10:30 น.</p>
+          <span class="tag">เต็มแล้ว</span>
+        </div>
+        <button class="secondary" style="width: auto; margin: 0; padding: 8px 12px" onclick="go('map')">ดู</button>
+      </div>
+
+      <div class="card issue" style="margin-top: 9px">
+        <div class="issueicon" style="background: #e8eee1">♻️</div>
+        <div class="issuebody">
+          <h3>จุดแยกขยะ อาคาร A</h3>
+          <p class="sub">หน้าทางเข้าอาคาร A</p>
+          <span class="tag green">ใกล้เต็ม 80%</span>
+        </div>
+        <button class="secondary" style="width: auto; margin: 0; padding: 8px 12px" onclick="go('map')">ดู</button>
+      </div>
+
+      <div class="notice">
+        💡 <b>ทิปเล็ก ๆ</b> ถ่ายภาพให้เห็นบริเวณรอบ ๆ จะช่วยให้ระบุตำแหน่งปัญหาได้ง่ายขึ้น
+      </div>
+    </section>
+
+    <!-- ── แผนที่ ── -->
+    <section class="page" id="map">
+      <button class="back" onclick="go('home')">← กลับหน้าหลัก</button>
+      <h2 style="margin-top: 12px">แผนที่จุดทิ้งขยะ</h2>
+      <p class="sub" style="margin-bottom: 13px">ตำแหน่งจำลอง · แตะหมุดเพื่อดูรายละเอียด</p>
+
+      <div class="map">
+        <div class="park">สวนสาธารณะ</div>
+        <div class="pin"      style="left: 22%; top: 52%" onclick="binInfo('ถังสวนกลาง', 'ว่าง 35%')"></div>
+        <div class="pin warn" style="left: 62%; top: 25%" onclick="binInfo('ถังอาคาร A', 'ใกล้เต็ม 80%')"></div>
+        <div class="pin full" style="left: 76%; top: 59%" onclick="binInfo('ถังสนามกีฬา', 'เต็มแล้ว')"></div>
+        <div class="mapkey">
+          <span>🟢 ว่าง</span>
+          <span>🟠 ใกล้เต็ม</span>
+          <span>🔴 เต็มแล้ว</span>
+        </div>
+      </div>
+
+      <div class="card" id="bininfo" style="margin-top: 12px">
+        <b>เลือกถังขยะบนแผนที่</b>
+        <p class="sub">สถานะจะปรากฏตรงนี้</p>
+      </div>
+
+      <button class="primary" onclick="go('report')">＋ แจ้งปัญหาขยะ</button>
+
+      <div class="notice">
+        ข้อมูลแผนที่นี้จัดทำเพื่อสาธิตแนวคิดเท่านั้น ไม่ใช่ตำแหน่งจริง
+      </div>
+    </section>
+
+    <!-- ── แจ้งปัญหา ── -->
+    <section class="page" id="report">
+      <button class="back" onclick="go('home')">← กลับหน้าหลัก</button>
+      <h2 style="margin-top: 12px">แจ้งปัญหาขยะ</h2>
+      <p class="sub">กรอกข้อมูลสั้น ๆ เพื่อทดลองส่งรายงาน</p>
+
+      <form id="reportform">
+        <label for="kind">ปัญหาที่พบ</label>
+        <select id="kind">
+          <option>ถังขยะเต็ม</option>
+          <option>ขยะตกบนพื้น</option>
+          <option>ขยะไม่ถูกแยกประเภท</option>
+          <option>จุดทิ้งขยะไม่เพียงพอ</option>
+        </select>
+
+        <label for="place">สถานที่</label>
+        <select id="place">
+          <option>สวนสาธารณะ / สวนกลาง</option>
+          <option>อาคาร A</option>
+          <option>สนามกีฬา</option>
+          <option>ตลาด</option>
+          <option>อื่น ๆ</option>
+        </select>
+
+        <label for="photo">รูปภาพประกอบ (ถ้ามี)</label>
+        <input id="photo" type="file" accept="image/*">
+
+        <label for="detail">รายละเอียดเพิ่มเติม</label>
+        <textarea id="detail" placeholder="เช่น ถังเต็มและมีขยะวางอยู่ข้างถัง"></textarea>
+
+        <button class="primary" type="submit">ส่งรายงาน</button>
+      </form>
+
+      <div id="reportresult"></div>
+
+      <div class="notice">
+        การส่งในต้นแบบนี้เป็นการจำลองเท่านั้น ข้อมูลไม่ได้ส่งถึงหน่วยงานจริง
+      </div>
+    </section>
+
+    <!-- ── ติดตาม ── -->
+    <section class="page" id="track">
+      <button class="back" onclick="go('home')">← กลับหน้าหลัก</button>
+      <h2 style="margin-top: 12px">รายงานของฉัน</h2>
+      <p class="sub">ตัวอย่างการติดตามสถานะ</p>
+
+      <div class="card">
+        <span class="tag green">ST-001 · รับเรื่องแล้ว</span>
+        <h3 style="margin-top: 12px">ถังขยะสวนกลางเต็ม</h3>
+        <p class="sub">สวนสาธารณะ / สวนกลาง · 10:15 น.</p>
+
+        <div class="timeline">
+          <span class="stepdot">✓</span>
+          <div class="steptext">
+            <b>รับเรื่องแล้ว</b>
+            <small>ระบบได้รับรายงาน (จำลอง)</small>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <span class="stepdot" style="background: #f6ead8; color: #a16d2d">2</span>
+          <div class="steptext">
+            <b>รอเจ้าหน้าที่ตรวจสอบ</b>
+            <small>รอดำเนินการ</small>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <span class="stepdot" style="background: #f0f0ea; color: #90988f">3</span>
+          <div class="steptext">
+            <b>แก้ไขเรียบร้อย</b>
+            <small>จะแสดงเมื่อแก้ไขเสร็จ</small>
+          </div>
+        </div>
+      </div>
+
+      <h2>ฟีเจอร์ใหม่ · แต้มรักษ์โลก</h2>
+
+      <div class="points">
+        <div>
+          <small class="sub">แต้มสะสมตัวอย่าง</small><br>
+          <strong>🌿 120 แต้ม</strong>
+        </div>
+        <span>♻️</span>
+      </div>
+
+      <p class="sub" style="margin-top: 9px">
+        แนวคิด: ให้ผู้ใช้มีส่วนร่วมในการแยกขยะและดูแลพื้นที่ส่วนรวม
+      </p>
+
+      <button class="secondary" onclick="alert('ส่วนนี้เป็นตัวอย่างแนวคิด ยังไม่มีการบันทึกแต้มจริง')">
+        ดูประวัติแต้ม
+      </button>
+    </section>
+
+  </main>
+
+  <footer>PAKALOLO GROUP · ต้นแบบเพื่อทดสอบแนวคิด</footer>
+
+  <nav class="nav">
+    <button class="active" data-page="home"   onclick="go('home')">  <span>⌂</span>หน้าหลัก</button>
+    <button               data-page="map"    onclick="go('map')">   <span>⌖</span>แผนที่</button>
+    <button               data-page="report" onclick="go('report')"><span>＋</span>แจ้งปัญหา</button>
+    <button               data-page="track"  onclick="go('track')"> <span>☷</span>ติดตาม</button>
+  </nav>
+
+</div>
+
+<script>
+  function go(id) {
+    document.querySelectorAll('.page').forEach(p =>
+      p.classList.toggle('active', p.id === id)
+    );
+    document.querySelectorAll('.nav button').forEach(b =>
+      b.classList.toggle('active', b.dataset.page === id)
+    );
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function binInfo(name, status) {
+    document.getElementById('bininfo').innerHTML =
+      '<h3>' + name + '</h3>' +
+      '<p class="sub">สถานะ: ' + status + '</p>' +
+      '<button class="secondary" onclick="go(&quot;report&quot;)">แจ้งปัญหาที่จุดนี้</button>';
+  }
+
+  document.getElementById('reportform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const id = 'ST-' + Math.floor(100 + Math.random() * 900);
+    document.getElementById('reportresult').innerHTML =
+      '<div class="success">' +
+        '<b>ส่งรายงานตัวอย่างแล้ว</b><br>' +
+        'หมายเลขรายงาน: ' + id + '<br>' +
+        'สถานะ: รับเรื่องแล้ว' +
+      '</div>' +
+      '<button class="secondary" onclick="go(&quot;track&quot;)">ไปหน้าติดตามรายงาน</button>';
+  });
+</script>
+
+</body>
+</html>
